@@ -1,17 +1,17 @@
-# syntax=docker/dockerfile:1.4
 FROM node:18
-
 WORKDIR /app
 
+# Copy only package files first to leverage Docker cache
 COPY package*.json ./
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm install
+# Install dependencies (including dev dependencies for development)
+RUN npm install
 
-RUN npm install -g nodemon
+# Set environment to development
+ENV NODE_ENV=development
 
-# Do NOT copy source code here
-# Source will be mounted from host
-
+# Expose app port
 EXPOSE 3847
-CMD ["nodemon", "--legacy-watch", "src/index.js"]
+
+# Use a command suitable for development (with hot-reload)
+CMD ["npm", "run", "dev"]

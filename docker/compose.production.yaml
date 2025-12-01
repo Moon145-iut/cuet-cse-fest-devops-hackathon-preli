@@ -1,5 +1,4 @@
-version: "3.9"
-
+# docker/compose.production.yaml
 services:
   mongo:
     image: mongo:7
@@ -7,10 +6,6 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
     volumes:
       - mongo_data:/data/db
     networks:
@@ -26,7 +21,7 @@ services:
     environment:
       NODE_ENV: production
     expose:
-      - "${BACKEND_PORT}"      # internal only
+      - "3847"
     depends_on:
       - mongo
     networks:
@@ -42,9 +37,9 @@ services:
       - ../.env
     environment:
       NODE_ENV: production
-      BACKEND_URL: "http://backend:${BACKEND_PORT}"
+      BACKEND_URL: "http://backend:3847"
     ports:
-      - "${GATEWAY_PORT}:${GATEWAY_PORT}"   # only public entrypoint
+      - "5921:5921"
     depends_on:
       - backend
     networks:
