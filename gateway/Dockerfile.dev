@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1.4
+FROM node:18
+
+WORKDIR /app
+COPY package*.json ./
+
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
+
+RUN npm install -g nodemon
+
+EXPOSE 5921
+CMD ["nodemon", "--legacy-watch", "src/index.js"]

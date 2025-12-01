@@ -1,6 +1,60 @@
-# services:
-  # backend:
+version: "3.9"
 
-  # gateway:
+services:
+  mongo:
+    image: mongo:7
+    container_name: cuet_mongo_dev
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    volumes:
+      - mongo_data_dev:/data/db
+    networks:
+      - internal
 
-  # mongo:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    container_name: cuet_backend_dev
+    env_file:
+      - ../.env
+    environment:
+      NODE_ENV: development
+    expose:
+      - "${BACKEND_PORT}"
+    depends_on:
+      - mongo
+    volumes:
+      - ../backend/src:/app/src
+      - ../backend/tsconfig.json:/app/tsconfig.json
+    networks:
+      - internal
+
+  gateway:
+    build:
+      context: ../gateway
+      dockerfile: Dockerfile.dev
+    container_name: cuet_gateway_dev
+    env_file:
+      - ../.env
+    environment:
+      NODE_ENV: development
+      BACKEND_URL: "http://backend:${BACKEND_PORT}"
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    depends_on:
+      - backend
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  mongo_data_dev:
